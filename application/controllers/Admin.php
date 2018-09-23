@@ -1726,6 +1726,13 @@ class Admin extends MY_Controller
 		}
 	}
 	
+	public function reset_password()
+	{
+		$email = $this->input->post('email');
+		$success = (int)($this->aauth->remind_password($email));
+		echo json_encode(array('success' => $success));
+	}
+	
 	/**
 	 * Set user quota
 	 * Sets user quota. Can be set manually, or use database default

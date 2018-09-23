@@ -2,6 +2,7 @@
 <script type="text/javascript">
 	var user = {
 		"id": <?=$basic->id?>,
+		"email": <?php echo '"' . $basic->email . '"';?>,
 		"name": <?php echo '"' . $basic->name . " " . $basic->surname . '"';?>,
 		"banned": <?=$basic->banned?>
 	};
@@ -22,6 +23,10 @@
 	// Toolbar button listeners
 	$('#save_button').click(function(){
 		saveData(user);
+	});
+
+	$('#password_button').click(function(){
+		resetPassword(user);
 	});
 
 	$('#quota_button').click(function(){
@@ -60,6 +65,9 @@
 	<div class="btn-toolbar well well-sm" id="toolbar">
 		<a id="save_button" type="button submit" class="btn btn-success">
 			<span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Save
+		</a>
+		<a id="password_button" type="button" class="btn btn-info">
+			Reset password
 		</a>
 		<a id="quota_button" type="button" class="btn btn-info">
 			<span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Reset quota <span id="quota_badge" class="badge"><?=round($basic->quota, 1);?></span>

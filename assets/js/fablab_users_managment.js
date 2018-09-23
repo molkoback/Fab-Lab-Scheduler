@@ -1,6 +1,7 @@
 // Most function has user object as argument. Example object: 
 // 	var user = {
 //		"id": 1,
+//		"email": user@example.com,
 //		"name": Test Person,
 //		"banned": 0 // or 1 if banned
 //	};
@@ -8,6 +9,7 @@
 var php_url = {
 	// Urls to php functions
 	"save": "save_user_data",
+	"password": "reset_password",
 	"quota": "set_quota",
 	"ban": "ban_user",
 	"unban": "unban_user",
@@ -71,6 +73,32 @@ function saveData(user) {
 			}
 		}
 	}); 
+}
+
+function resetPassword(user) {
+	// Send user password reset email
+	disableForm(true);
+	var post_data = {
+		'email': user.email,
+		'csrf_test_name': csrf_token
+	};
+	
+	$.ajax({
+		type: "POST",
+		url: php_url.password,
+		data: post_data,
+		success: function(data) {
+			disableForm(false);
+			if (data.length > 0) {
+				var message = $.parseJSON(data);
+				if (message.success == 1) {
+					alerter("info", "Password reset email sent to " + user.email + "!"); 
+				} else {
+					alerter("warning", "<strong>Error</strong> while sending password reset email to " + user.email + "!"); 
+				}
+			}
+		}
+	});
 }
 
 function setQuota(user, amount) {
