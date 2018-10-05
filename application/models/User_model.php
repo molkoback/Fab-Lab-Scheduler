@@ -146,6 +146,26 @@ class User_model extends CI_Model {
     	$results = $this->db->query($sql,$user_id)->result_array();
     	return $results;
     }
+    /**
+    * This function init the user levels to 0. If the user does not have rows in the UserLevel table, a bug prevent from showing reservation information to admins.
+    * TODO When a machine is added, it should be added for that machine. 
+    **/
+    function init_user_levels ($user_id)
+    {
+        
+        $this->db->select("MachineID");
+        $query= $this->db->get("Machine");
+        foreach ($query->result() as $row)
+        {
+            $data = array(
+                'MachineID' => $row->MachineID,
+                'Aauth_usersID'  => $user_id,
+                'Level'  => 0
+            );
+            $this->db->insert("UserLevel", $data);        
+        }
+       
+    }
 
     //FIXME: NOT USED?
     function get_session_data($user_id) 
