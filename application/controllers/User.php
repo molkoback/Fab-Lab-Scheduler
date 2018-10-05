@@ -411,6 +411,9 @@ class User extends MY_Controller
 		);
 		// insert extended user information
 		$this->User_model->insert_extended_user_data($extended_data);
+		//Create the table in the UserLevel
+		$this->User_model->init_user_levels($user_id);
+		error_log("Created init model for user $user_id");
 		// authorize priviledged email addresses
 		$this->authorize_priviledged_email($user_id, $post_data['email']);
 		$post_data['success'] = true;
