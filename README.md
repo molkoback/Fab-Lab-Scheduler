@@ -3,3 +3,6 @@
 
 See wiki for basic documentation https://github.com/vaimi/Fab-Lab-Scheduler/wiki
 
+## Release information
+
+ - **1.0-beta**: Original version directly forked from  https://github.com/vaimi/Fab-Lab-Scheduler/
