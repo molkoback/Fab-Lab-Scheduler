@@ -16,21 +16,23 @@ class Admin_model extends CI_Model {
     	return $this->db->query($sql)->result_array();
     }
 	
+    // This the original function look database for users based on search
 	public function get_autocomplete($search_data, $offset=0)
     {
 		$this->db->select('main.id, main.email, main.name, extra.phone_number, extra.first_name, extra.surname, extra.student_number');
 		$this->db->from('aauth_users as main');
 		$this->db->join('extended_users_information as extra', 'main.id = extra.id');
-		$this->db->like('main.email', $search_data);
-        $this->db->or_like('main.name', $search_data);
-		$this->db->or_like('extra.phone_number', $search_data);
-		$this->db->or_like('extra.first_name', $search_data);
-		$this->db->or_like('extra.surname', $search_data);
-		$this->db->or_like('extra.student_number', $search_data);
+		$this->db->like('main.email', $search_data, 'after');
+		$this->db->or_like('main.name', $search_data, 'after');
+		$this->db->or_like('extra.phone_number', $search_data, 'after');
+		$this->db->or_like('extra.first_name', $search_data, 'after');
+		$this->db->or_like('extra.surname', $search_data, 'after');
+		$this->db->or_like('extra.student_number', $search_data, 'after');
 		$this->db->limit(10);
 		$this->db->offset($offset);
 		return $this->db->get();
     }
+    
 	public function get_general_settings()
 	{
 		$tmp = array();
