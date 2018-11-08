@@ -69,9 +69,6 @@
 		<a id="password_button" type="button" class="btn btn-info">
 			Reset password
 		</a>
-		<a id="quota_button" type="button" class="btn btn-info">
-			<span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Reset quota <span id="quota_badge" class="badge"><?=round($basic->quota, 1);?></span>
-		</a>
 		<div class="btn-group">
 			<a type="button" id="ban_button" class="btn btn-warning">
 				<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span> Ban

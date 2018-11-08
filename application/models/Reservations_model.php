@@ -1,10 +1,12 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Reservations_model extends CI_Model {
-
     function __construct()
     {
         // Call the Model constructor
         parent::__construct();
+        
+        // Create Token API object
+        $this->load->library('tokens');
     }
     
     public function get_machine_user_emails($machine_id)
@@ -290,42 +292,35 @@ class Reservations_model extends CI_Model {
     	$r = $this->db->get()->row();
     	return isset($r) ? $r->Level : 1;
     }
-
+    
+    public function get_user_token_id($user_id) {
+        $this->db->select("email");
+        $this->db->from("aauth_users");
+        $this->db->where("id", $user_id);
+        $email = $this->db->get()->row()->email;
+        return hash('sha256', $email);
+    }
+    
     public function get_user_quota($user_id) {
-        $settings = $this->get_general_settings();
-        $limit = (int)$settings['default_tokens'];
-        $reservation_count = $this->get_user_active_reservation_count($user_id);
-        if ($reservation_count < $limit)
-        {
-            $this->db->select("quota");
-            $this->db->from("extended_users_information");
-            $this->db->where("id", $user_id);
-            $result = $this->db->get();
-            $quota = 0;
-            if ($result->num_rows() == 1)
-            {
-                $quota = $result->row()->quota;
-            }
-            if ($limit > $quota)
-            {
-                $quota_new = $limit - $reservation_count;
-                if ($quota_new > $quota) // If the user will benefit from the change.
-                {
-                    $this->db->update('extended_users_information', array('Quota' => $quota), array('id' => $user_id));
-                    return $quota_new;
-                }
-            }
-        }
-        $this->db->flush_cache();
+        // Get tokens from our database
         $this->db->select("quota");
         $this->db->from("extended_users_information");
         $this->db->where("id", $user_id);
-        $result = $this->db->get();
-        if ($result->num_rows() == 1)
-        {
-            return $result->row()->quota;
+        $tokens_old = $this->db->get()->row()->quota;
+        
+        // Get tokens from Token API
+        $token_id = $this->get_user_token_id($user_id);
+        try {
+            $tokens = $this->tokens->get_tokens($token_id);
         }
-        return 0;
+        catch (Exception $e) {
+            $tokens = (int)$tokens_old;
+        }
+        
+        // Update database token count
+        if ($tokens != $tokens_old)
+            $this->db->update('extended_users_information', array('quota' => $tokens), array('id' => $user_id));
+        return $tokens;
     }
 
     public function is_reserved($start, $end, $machine)
@@ -377,14 +372,15 @@ class Reservations_model extends CI_Model {
     }
 
     public function reduce_quota($user_id) {
-        $quota = $this->get_user_quota($user_id);
-        $quota = $quota-1;
-        if ($quota >= 0)
-        {
-            $this->db->update('extended_users_information', array('Quota' => $quota), array('id' => $user_id));
-            return True;
+        $token_id = $this->get_user_token_id($user_id);
+        try {
+            $tokens = $this->tokens->withdraw($token_id, 100);
         }
-        return false;
+        catch (Exception $e) {
+            return false;
+        }
+        $this->db->update('extended_users_information', array('quota' => $tokens), array('id' => $user_id));
+        return true;
     }
 
     public function get_previous_reservation_end($machine_id, $time) 
