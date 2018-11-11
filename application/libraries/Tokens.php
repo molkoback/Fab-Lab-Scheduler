@@ -4,6 +4,7 @@ class Tokens {
 	protected $CI;
 	protected $config_vars;
 	protected $url = '';
+	protected $userpwd = '';
 	
 	public function __construct() {
 		$this->CI = & get_instance();
@@ -12,6 +13,9 @@ class Tokens {
 		$this->CI->config->load('tokens');
 		$this->config_vars = $this->CI->config->item('tokens');
 		$this->url = $this->config_vars['token_api_url'];
+		$user = $this->config_vars['token_api_user'];
+		$pwd = $this->config_vars['token_api_passwd'];
+		$this->userpwd = "$user:$pwd";
 	}
 	
 	private function parse_data($data) {
@@ -29,6 +33,8 @@ class Tokens {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL,"{$this->url}?token_id=$id");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_USERPWD, $this->userpwd);
+		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 		$data = curl_exec($ch);
 		curl_close($ch);
 		return $this->parse_data($data);
@@ -40,6 +46,8 @@ class Tokens {
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, "token_id=$id&tokens=$tokens");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_USERPWD, $this->userpwd);
+		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 		$data = curl_exec($ch);
 		curl_close($ch);
 		return $this->parse_data($data);
